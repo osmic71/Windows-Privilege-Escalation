@@ -1,4 +1,4 @@
-:: Local Privilege Escalation Workshop - Sagi Shahar (@s4gi_) - Osmin Oliva (#)
+:: Local Privilege Escalation Workshop - Sagi Shahar (@s4gi_) - Osmin Oliva (@osmic71)
 @echo off
 setlocal EnableDelayedExpansion
 
@@ -19,7 +19,7 @@ for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1)
 :::hjw   ^--^---'--^---^-^--^--^---'--^---^-^-^-==-^--^---^-'
 :::
 :::     Local Privilege Escalation Workshop - Windows Installer
-:::                      Sagi Shahar (@s4gi_)
+:::           Sagi Shahar (@s4gi_)  Osmin Oliva (@osmic71)
 
 for /f "delims=: tokens=*" %%A in ('findstr /b ::: "%~f0"') do (
   echo(%%A
