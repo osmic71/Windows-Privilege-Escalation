@@ -192,6 +192,7 @@ if not exist "C:\Tools" (
 )
 ::
 netsh advfirewall set currentprofile state off
+reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
 ::
 
 call :color 0f "[*] Adding autologon user to registry.."
