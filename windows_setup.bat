@@ -191,6 +191,7 @@ if not exist "C:\Tools" (
     mkdir "C:\Tools"
 )
 ::
+netsh advfirewall set currentprofile state off
 ::
 
 call :color 0f "[*] Adding autologon user to registry.."
