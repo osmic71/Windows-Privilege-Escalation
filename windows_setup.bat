@@ -190,11 +190,18 @@ if %errorlevel% == 0 (
 if not exist "C:\Tools" (
     mkdir "C:\Tools"
 )
+if not exist "C:\Windows\Repair" (
+    mkdir "C:\Windows\Repair"
+)
 ::
-netsh advfirewall set currentprofile state off
-reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
+call :color 0f "[*] Disabling All Firewall Profiles"
+echo.
+netsh advfirewall set allprofiles state off > nul
+call :color 0f "[*] Disabling Windows Defender"
+echo.
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender" /v DisableAntiSpyware /t REG_DWORD /d 1 /f > nul
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender" /v DisableRealtimeMonitoring /t REG_DWORD /d 1 /f > nul
 ::
-
 call :color 0f "[*] Adding autologon user to registry.."
 echo.
 reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "DefaultUsername" /t REG_SZ /d adminis /f >nul
@@ -232,6 +239,15 @@ md "C:\Missing Scheduled Binary"
 call :reset_file_permissions "C:\Missing Scheduled Binary"
 call :color 0f "[*] Further instructions to run upon restart.."
 echo.
+call :write_file scheduled.exe
+call :calculate_md5 scheduled.exe, ret_md5_val
+call :confirm_md5_hash "9b8377237f5dea36d6af73e3f8f932a2", "%ret_md5_val%" || goto :eof
+call :move_file scheduled.exe, "C:\Missing Scheduled Binary"
+call :reset_file_permissions "C:\Missing Scheduled Binary\scheduled.exe"
+schtasks /Create /F /RU SYSTEM /SC Minute /TN "MyTasks" /TR "C:\Missing Scheduled Binary\scheduled.exe" >nul
+call :color 0a "[+] Scheduled Task configuration complete."
+echo.
+echo.
 call :color 0a "[+] Exercise 12 configuration complete."
 echo.
 echo.
@@ -257,6 +273,12 @@ call :calculate_md5 lpe.bat, ret_md5_val
 call :confirm_md5_hash "3c48bd51583d5487c06f823f6a32d303", "%ret_md5_val%" || goto :eof
 call :move_file lpe.bat, "C:\Temp"
 schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "lpe" /TR "\"C:\Temp\lpe.bat\"" >nul
+call :write_file savecred.bat
+call :calculate_md5 savecred.bat, ret_md5_val
+call :confirm_md5_hash "5d8190e96d1b2e3230e1fd2409db81db", "%ret_md5_val%" || goto :eof
+call :move_file savecred.bat, "C:\PrivEsc"
+icacls C:\PrivEsc\savecred.bat /grant user:RX >nul 2>&1
+schtasks /Create /F /RU "user" /SC ONLOGON /TN "SaveCred" /TR "\"C:\PrivEsc\savecred.bat\"" >nul
 
 :: return 0
 call :color 0a "[+] Configuration completed successfully."
@@ -402,6 +424,13 @@ if !original_file! == lpe.bat (
     echo|set /p="535c257061727365645f736964255c536f6674776172655c53696d6f6e54617468616d5c50755454595c53657373696f6e735c425750313233463432202f76202250726f787950617373776f726422202f74205245475f535a202f642070617373776f7264333231202f660d0a7265672061646420484b45595f55534552535c">>%hex_file%
     echo|set /p="257061727365645f736964255c536f6674776172655c5469676874564e435c536572766572202f76202250617373776f726422202f74205245475f42494e415259202f6420226563383464623862653738363165346422202f660d0a7265672061646420484b45595f55534552535c257061727365645f736964255c536f6674">>%hex_file%
     echo|set /p="776172655c5469676874564e435c536572766572202f76202250617373776f7264566965774f6e6c7922202f74205245475f42494e415259202f6420223262323763303034663336643436643022202f660d0a65786974202f62">>%hex_file%
+    certutil -f -decodeHex %hex_file% %original_file% >nul
+    del /f %hex_file%
+    exit /b
+)
+if !original_file! == savecred.bat (
+    echo|set /p="406966202840436F646553656374696F6E203D3D204042617463682920407468656E0A406563686F206F66660A73746172742022222072756E6173202F7361766563726564202F757365723A61646D696E2022636D642E657865202F432065786974220A43536372697074202F2F6E6F6C6F676F202F2F453A4A536372697074">%hex_file%
+    echo|set /p="2022257E4630220A676F746F203A454F460A40656E640A575363726970742E4372656174654F626A6563742822575363726970742E5368656C6C22292E53656E644B657973282270617373776F72643132337B454E5445527D22293B0A">>%hex_file%
     certutil -f -decodeHex %hex_file% %original_file% >nul
     del /f %hex_file%
     exit /b
