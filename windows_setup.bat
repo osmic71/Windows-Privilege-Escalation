@@ -1,4 +1,4 @@
-:: Local Privilege Escalation Workshop - Sagi Shahar (@s4gi_), Tib3rius (@tibsec)
+:: Local Privilege Escalation Workshop - Sagi Shahar (@s4gi_) - Osmin Oliva (@osmic71)
 @echo off
 setlocal EnableDelayedExpansion
 
@@ -9,9 +9,14 @@ for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1)
 )
 <nul > X set /p ".=."
 
-:::
-:::     Local Privilege Escalation Workshop - Windows Installer
-:::             Sagi Shahar (@s4gi_), Tib3rius (@tibsec)
+:::          _____                                      _____
+:::         ( ___ )------------------------------------( ___ )
+:::          | / |                                      | \ |
+:::          | / |    Windows Privilege Escalation      | \ |
+:::          |___|          Windows Installer           |___|
+:::         (_____)------------------------------------(_____)
+:::     
+:::           Sagi Shahar (@s4gi_)  Osmin Oliva (@osmic71)
 
 for /f "delims=: tokens=*" %%A in ('findstr /b ::: "%~f0"') do (
   echo(%%A
@@ -22,7 +27,7 @@ echo.
 whoami /groups | findstr /i /c:"high mandatory Level" >nul && (
    goto main
 ) || (
-   call :color 0c "[-] 'run as Administrator' is required to run this file. Exiting.."
+   call :color 0c "[-] 'run as admistrator' is required to run this file. Exiting.."
    echo.
    del /f X
    pause
@@ -50,33 +55,41 @@ if %errorlevel% == 0 (
 ) else (
    net user user password321 /add >nul 2>&1
 )
-call :color 0f "[*] Creating a local admin account.."
+call :color 0f "[*] Creating a local adminis account.."
 echo.
-call :color 0e "[i] Username: admin    Password: password123"
+call :color 0e "[i] Username: adminis    Password: password123"
 echo.
-net user admin >nul 2>&1
+net user adminis >nul 2>&1
 if %errorlevel% == 0 (
-   net user admin password123 >nul 2>&1
-   net localgroup administrators admin /add >nul 2>&1
+   net user adminis password123 >nul 2>&1
+   net localgroup administrators adminis /add >nul 2>&1
 ) else (
-   net user admin password123 /add >nul 2>&1
-   net localgroup administrators admin /add >nul 2>&1
+   net user adminis password123 /add >nul 2>&1
+   net localgroup administrators adminis /add >nul 2>&1
 )
-if not exist "C:\PrivEsc" (
-    mkdir "C:\PrivEsc"
+if not exist "C:\Tools" (
+    mkdir "C:\Tools"
+)
+if not exist "C:\Utilities" (
+    mkdir "C:\Utilities"
 )
 if not exist "C:\Windows\Repair" (
     mkdir "C:\Windows\Repair"
 )
-if not exist "C:\DevTools" (
-    mkdir "C:\DevTools"
+if not exist "C:\Missing Scheduled Binary" (
+    mkdir "C:\Missing Scheduled Binary"
 )
 call :color 0a "[+] Initial setup complete."
 echo.
 echo.
 
-:: Services (DLL Hijacking)
-call :color 0f "[*] Configuring Services (DLL Hijacking)"
+:: Exercise 1 - Kernel
+call :color 0e "[i] Skipping configuration of Exercise 1 - Kernel"
+echo.
+echo.
+
+:: Exercise 2 - Services (DLL Hijacking)
+call :color 0f "[*] Configuring Exercise 2 - Services (DLL Hijacking)"
 echo.
 call :write_file dllhijackservice.exe
 call :calculate_md5 dllhijackservice.exe, ret_md5_val
@@ -90,12 +103,12 @@ setx /m Path "%PATH%;C:\Temp" >nul
 call :create_service "dllsvc", "C:\Program Files\DLL Hijack Service\dllhijackservice.exe", "DLL Hijack Service"
 call :set_service_permissions "dllsvc", "D:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;RPWPLCRCCCLOSW;;;WD)S:(AU;FA;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)"
 call :start_service "dllsvc"
-call :color 0a "[+] Services (DLL Hijacking) configuration complete."
+call :color 0a "[+] Exercise 2 configuration complete."
 echo.
 echo.
 
-:: Services (binPath)
-call :color 0f "[*] Configuring Services (binPath)"
+:: Exercise 3 - Services (binPath)
+call :color 0f "[*] Configuring Exercise 3 - Services (binPath)""
 echo.
 call :write_file daclservice.exe
 call :calculate_md5 daclservice.exe, ret_md5_val
@@ -105,12 +118,12 @@ call :reset_file_permissions "C:\Program Files\DACL Service\daclservice.exe"
 call :create_service "daclsvc", "C:\Program Files\DACL Service\daclservice.exe", "DACL Service"
 call :set_service_permissions "daclsvc", "D:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;RPWPLCRCCCLOSWDC;;;WD)S:(AU;FA;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)"
 call :start_service "daclsvc"
-call :color 0a "[+] Services (binPath) configuration complete."
+call :color 0a "[+] Exercise 3 configuration complete."
 echo.
 echo.
 
-:: Services (Unquoted Path)
-call :color 0f "[*] Configuring Services (Unquoted Path)"
+:: Exercise 4 - Services (Unquoted Path)
+call :color 0f "[*] Configuring Exercise 4 - Services (Unquoted Path)"
 echo.
 call :write_file unquotedpathservice.exe
 call :calculate_md5 unquotedpathservice.exe, ret_md5_val
@@ -120,12 +133,12 @@ call :reset_file_permissions "C:\Program Files\Unquoted Path Service"
 call :create_service "unquotedsvc", "C:\Program Files\Unquoted Path Service\Common Files\unquotedpathservice.exe", "Unquoted Path Service"
 call :set_service_permissions "unquotedsvc", "D:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;RPWPLCRCCCLOSW;;;WD)S:(AU;FA;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)"
 call :start_service "unquotedsvc"
-call :color 0a "[+] Services (Unquoted Path) configuration complete."
+call :color 0a "[+] Exercise 4 configuration complete."
 echo.
 echo.
 
-:: Services (Registry)
-call :color 0f "[*] Configuring Services (Registry)"
+:: Exercise 5 - Services (Registry)
+call :color 0f "[*] Configuring Exercise 5 - Services (Registry)"
 echo.
 call :write_file insecureregistryservice.exe
 call :calculate_md5 insecureregistryservice.exe, ret_md5_val
@@ -140,12 +153,12 @@ echo HKEY_LOCAL_MACHINE\SYSTEM\ControlSet001\services\regsvc [17 1 21 8] > regsv
 regini regsvc.txt
 del /f regsvc.txt
 call :start_service "regsvc"
-call :color 0a "[+] Services (Registry) configuration complete."
+call :color 0a "[+] Exercise 5 configuration complete."
 echo.
 echo.
 
-:: Services (Executable File)
-call :color 0f "[*] Configuring Services (Executable File)"
+:: Exercise 6 - Services (Executable File)
+call :color 0f "[*] Configuring Exercise 6 - Services (Executable File)"
 echo.
 call :write_file filepermservice.exe
 call :calculate_md5 filepermservice.exe, ret_md5_val
@@ -155,12 +168,12 @@ call :reset_file_permissions "C:\Program Files\File Permissions Service\fileperm
 call :create_service "filepermsvc", "C:\Program Files\File Permissions Service\filepermservice.exe", "File Permissions Service"
 call :set_service_permissions "filepermsvc", "D:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;RPWPLCRCCCLOSW;;;WD)S:(AU;FA;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)"
 call :start_service "filepermsvc"
-call :color 0a "[+] Services (Executable File) configuration complete."
+call :color 0a "[+] Exercise 6 configuration complete."
 echo.
 echo.
 
-:: Registry (Autorun)
-call :color 0f "[*] Configuring Registry (Autorun)"
+:: Exercise 7 - Registry (Autorun)
+call :color 0f "[*] Configuring Exercise 7 - Registry (Autorun)"
 echo.
 call :color 0f "[*] Copying dummy program.."
 echo.
@@ -170,64 +183,75 @@ call :reset_file_permissions "C:\Program Files\Autorun Program\program.exe"
 call :color 0f "[*] Adding program to run at startup via registry.."
 echo.
 reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run /v "My Program" /t REG_SZ /d "\"C:\Program Files\Autorun Program\program.exe\"" /f >nul
-call :color 0a "[+] Registry (Autorun) configuration complete."
+call :color 0a "[+] Exercise 7 configuration complete."
 echo.
 echo.
 
-:: Registry (AlwaysInstallElevated)
-call :color 0f "[*] Configuring Registry (AlwaysInstallElevated)"
+:: Exercise 8 - Registry (AlwaysInstallElevated)
+call :color 0f "[*] Configuring Exercise 8 - Registry (AlwaysInstallElevated)"
 echo.
 call :color 0f "[*] Enabling AlwaysInstallElevated via registry.."
 echo.
 reg add HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v "AlwaysInstallElevated" /t REG_DWORD /d 1 /f >nul
 call :color 0f "[*] Final configuration will run upon restart..."
 echo.
-call :color 0a "[+] Registry (AlwaysInstallElevated) configuration complete."
+call :color 0a "[+] Exercise 8 configuration complete."
 echo.
 echo.
 
-:: Password Mining (Registry)
-call :color 0f "[*] Configuring Password Mining (Registry)"
+:: Exercise 9 - Password Mining (Memory)
+call :color 0e "[i] Skipping configuration of Exercise 9 - Password Mining (Memory)"
+echo.
+echo.
+:: Exercise 10 - Password Mining (Registry)
+call :color 0f "[*] Configuring Exercise 10 - Password Mining (Registry)"
 echo.
 call :color 0f "[*] Adding autologon user to registry.."
 echo.
-reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "DefaultUsername" /t REG_SZ /d admin /f >nul
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "DefaultUsername" /t REG_SZ /d adminis /f >nul
 reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "DefaultPassword" /t REG_SZ /d password123 /f >nul
 reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "AutoAdminLogon" /t REG_SZ /d 1 /f >nul
-call :color 0a "[+] Password Mining (Registry) configuration complete."
+call :color 0a "[+] Exercise 10 configuration complete."
 echo.
 echo.
 
-:: Password Mining (Configuration Files)
-call :color 0f "[*] Configuring Password Mining (Configuration Files)"
+:: Exercise 11 - Password Mining (Configuration Files)
+call :color 0f "[*] Configuring Exercise 11 - Password Mining (Configuration Files)"
 echo.
 call :write_file Unattend.xml
 call :calculate_md5 Unattend.xml, ret_md5_val
 call :confirm_md5_hash "63f7269bbc53e36d2a8c323721313f9c", "%ret_md5_val%" || goto :eof
 call :move_file Unattend.xml, "C:\Windows\Panther"
 call :reset_file_permissions "C:\Windows\Panther\Unattend.xml"
-call :color 0a "[+] Password Mining (Configuration Files) configuration complete."
+call :color 0e "[i] Skipping web.config section of the exercise.."
+echo.
+call :color 0a "[+] Exercise 11 configuration complete."
 echo.
 echo.
 
-:: Scheduled Tasks
-call :color 0f "[*] Configuring Scheduled Tasks"
+:: Exercise 12 - Scheduled Tasks (Missing Binary)
+call :color 0f "[*] Configuring Exercise 12 - Scheduled Tasks (Missing Binary)"
 echo.
-call :write_file CleanUp.ps1
-call :calculate_md5 CleanUp.ps1, ret_md5_val
-call :confirm_md5_hash "9b8377237f5dea36d6af73e3f8f932a2", "%ret_md5_val%" || goto :eof
-call :move_file CleanUp.ps1, "C:\DevTools"
-call :reset_file_permissions "C:\DevTools\CleanUp.ps1"
-schtasks /Create /F /RU SYSTEM /SC Minute /TN "CleanUp" /TR "powershell.exe -exec bypass -nop C:\DevTools\CleanUp.ps1" >nul
-call :color 0a "[+] Scheduled Task configuration complete."
+call :write_file scheduled.exe
+call :calculate_md5 scheduled.exe, ret_md5_val
+call :confirm_md5_hash "d62cfe23ad44ae27954d9b054296f2c3", "%ret_md5_val%" || goto :eof
+call :move_file scheduled.exe, "C:\Missing Scheduled Binary"
+call :reset_file_permissions "C:\Missing Scheduled Binary\scheduled.exe"
+schtasks /Create /F /RU SYSTEM /SC Minute /TN "MyTask" /TR "C:\Missing Scheduled Binary\scheduled.exe" >nul
+call :color 0a "[+] Exercise 12 configuration complete."
 echo.
 echo.
 
-:: Startup Applications
-call :color 0f "[*] Configuring Startup Applications"
+:: Exercise 13 - Hot Potato
+call :color 0e "[i] Skipping configuration of Exercise 13 - Hot Potato"
+echo.
+echo.
+
+:: Exercise 14 - Startup Applications
+call :color 0f "[*] Configuring Exercise 14 - Startup Applications"
 echo.
 call :reset_file_permissions "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Startup"
-call :color 0a "[+] Startup Applications configuration complete."
+call :color 0a "[+] Exercise 14 configuration complete."
 echo.
 echo.
 
@@ -236,20 +260,15 @@ call :color 0f "[*] Creating final configuration task to run upon restart..."
 echo.
 call :write_file lpe.bat
 call :calculate_md5 lpe.bat, ret_md5_val
-call :confirm_md5_hash "a61df3883f400102e17894d7e6177c92", "%ret_md5_val%" || goto :eof
-call :move_file lpe.bat, "C:\PrivEsc"
-schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "LPE" /TR "\"C:\PrivEsc\lpe.bat\"" >nul
-call :write_file AdminPaint.lnk
-call :calculate_md5 AdminPaint.lnk, ret_md5_val
-call :confirm_md5_hash "30b7a4303bcf16936432f30ce13edbb9", "%ret_md5_val%" || goto :eof
-call :move_file AdminPaint.lnk, "C:\PrivEsc"
-call :reset_file_permissions "C:\PrivEsc\AdminPaint.lnk"
+call :confirm_md5_hash "fbaa0a9ad6a89ffa8b999f86e188d280", "%ret_md5_val%" || goto :eof
+call :move_file lpe.bat, "C:\Utilities"
+schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "LPE" /TR "\"C:\Utilities\lpe.bat\"" >nul
 call :write_file savecred.bat
 call :calculate_md5 savecred.bat, ret_md5_val
-call :confirm_md5_hash "5d8190e96d1b2e3230e1fd2409db81db", "%ret_md5_val%" || goto :eof
-call :move_file savecred.bat, "C:\PrivEsc"
-icacls C:\PrivEsc\savecred.bat /grant user:RX >nul 2>&1
-schtasks /Create /F /RU "user" /SC ONLOGON /TN "SaveCred" /TR "\"C:\PrivEsc\savecred.bat\"" >nul
+call :confirm_md5_hash "e3aff18e0a769d6bce364f99f4b0a4f1", "%ret_md5_val%" || goto :eof
+call :move_file savecred.bat, "C:\Utilities"
+call :reset_file_permissions "C:\Utilities\savecred.bat\"
+schtasks /Create /F /RU SYSTEM /SC Minute /TN "SaveCred" /TR "\"C:\Utilities\savecred.bat\"" >nul
 
 :: return 0
 call :color 0a "[+] Configuration completed successfully."
@@ -257,6 +276,7 @@ echo.
 call :color 0a "[+] Please restart Windows to begin."
 echo.
 del /f X
+shutdown /r /t 0
 pause
 exit /b
 
@@ -385,41 +405,21 @@ if !original_file! == Unattend.xml (
     exit /b
 )
 if !original_file! == lpe.bat (
-    echo|set /p="406563686F206F66660D0A7365746C6F63616C0D0A666F72202F4620227573656261636B712064656C696D733D222025256120696E202860776D696320757365726163636F756E7420776865726520276E616D655E3D227573657222272067657420736964205E7C2066696E642022532D22602920646F20280D0A2020202073">%hex_file%
-    echo|set /p="6574207369643D2525610D0A290D0A63616C6C203A6164645F7265675F6B6579732025736964250D0A636F7079202F5920433A5C507269764573635C41646D696E5061696E742E6C6E6B20433A5C55736572735C757365725C4465736B746F70203E6E756C0D0A726567207361766520484B4C4D5C53595354454D20433A5C57">>%hex_file%
-    echo|set /p="696E646F77735C5265706169725C53595354454D202F79203E6E756C0D0A696361636C7320433A5C57696E646F77735C5265706169725C53595354454D202F6772616E7420757365723A52203E6E756C0D0A726567207361766520484B4C4D5C53414D20433A5C57696E646F77735C5265706169725C53414D202F79203E6E75">>%hex_file%
-    echo|set /p="6C0D0A696361636C7320433A5C57696E646F77735C5265706169725C53414D202F6772616E7420757365723A52203E6E756C0D0A65786974202F620D0A3A6164645F7265675F6B6579730D0A736574207061727365645F7369643D257E310D0A7265672061646420484B45595F55534552535C257061727365645F736964255C">>%hex_file%
-    echo|set /p="536F6674776172655C506F6C69636965735C4D6963726F736F66745C57696E646F77735C496E7374616C6C6572202F762022416C77617973496E7374616C6C456C65766174656422202F74205245475F44574F5244202F642031202F66203E6E756C0D0A7265672061646420484B4C4D5C534F4654574152455C506F6C696369">>%hex_file%
-    echo|set /p="65735C4D6963726F736F66745C57696E646F77735C496E7374616C6C6572202F762022416C77617973496E7374616C6C456C65766174656422202F74205245475F44574F5244202F642031202F66203E6E756C0D0A7265672061646420484B45595F55534552535C257061727365645F736964255C536F6674776172655C5369">>%hex_file%
-    echo|set /p="6D6F6E54617468616D5C50755454595C53657373696F6E735C425750313233463432202F76202250726F7879557365726E616D6522202F74205245475F535A202F642061646D696E202F66203E6E756C0D0A7265672061646420484B45595F55534552535C257061727365645F736964255C536F6674776172655C53696D6F6E">>%hex_file%
-    echo|set /p="54617468616D5C50755454595C53657373696F6E735C425750313233463432202F76202250726F787950617373776F726422202F74205245475F535A202F642070617373776F7264313233202F66203E6E756C0D0A65786974202F620D0A">>%hex_file%
+    echo|set /p="406563686f206f66660d0a7365746c6f63616c0d0a666f72202f4620227573656261636b712064656c696d733d222025256120696e202860776d696320757365726163636f756e7420776865726520276e616d655e3d227573657222272067657420736964205e7c2066696e642022532d22602920646f20280d0a2020202073">>%hex_file%
+    echo|set /p="6574207369643d2525610d0a290d0a63616c6c203a6164645f7265675f6b6579732025736964250d0a726567207361766520484b4c4d5c53595354454d20433a5c57696e646f77735c5265706169725c53595354454d202f79203e6e756c0d0a696361636c7320433a5c57696e646f77735c5265706169725c53595354454d20">>%hex_file%
+    echo|set /p="2f6772616e7420757365723a52203e6e756c0d0a726567207361766520484b4c4d5c53414d20433a5c57696e646f77735c5265706169725c53414d202f79203e6e756c0d0a696361636c7320433a5c57696e646f77735c5265706169725c53414d202f6772616e7420757365723a52203e6e756c0d0a65786974202f620d0a3a">>%hex_file%
+    echo|set /p="6164645f7265675f6b6579730d0a736574207061727365645f7369643d257e310d0a7265672061646420484b45595f55534552535c257061727365645f736964255c536f6674776172655c506f6c69636965735c4d6963726f736f66745c57696e646f77735c496e7374616c6c6572202f762022416c77617973496e7374616c">>%hex_file%
+    echo|set /p="6c456c65766174656422202f74205245475f44574f5244202f642031202f66203e6e756c0d0a7265672061646420484b4c4d5c534f4654574152455c506f6c69636965735c4d6963726f736f66745c57696e646f77735c496e7374616c6c6572202f762022416c77617973496e7374616c6c456c65766174656422202f742052">>%hex_file%
+    echo|set /p="45475f44574f5244202f642031202f66203e6e756c0d0a7265672061646420484b45595f55534552535c257061727365645f736964255c536f6674776172655c53696d6f6e54617468616d5c50755454595c53657373696f6e735c425750313233463432202f76202250726f7879557365726e616d6522202f74205245475f53">>%hex_file%
+    echo|set /p="5a202f642061646d696e6973202f66203e6e756c0d0a7265672061646420484b45595f55534552535c257061727365645f736964255c536f6674776172655c53696d6f6e54617468616d5c50755454595c53657373696f6e735c425750313233463432202f76202250726f787950617373776f726422202f74205245475f535a">>%hex_file%
+    echo|set /p="202f642070617373776f7264313233202f66203e6e756c0d0a65786974202f620d0a">>%hex_file%
     certutil -f -decodeHex %hex_file% %original_file% >nul
     del /f %hex_file%
     exit /b
 )
 if !original_file! == savecred.bat (
-    echo|set /p="406966202840436F646553656374696F6E203D3D204042617463682920407468656E0A406563686F206F66660A73746172742022222072756E6173202F7361766563726564202F757365723A61646D696E2022636D642E657865202F432065786974220A43536372697074202F2F6E6F6C6F676F202F2F453A4A536372697074">%hex_file%
-    echo|set /p="2022257E4630220A676F746F203A454F460A40656E640A575363726970742E4372656174654F626A6563742822575363726970742E5368656C6C22292E53656E644B657973282270617373776F72643132337B454E5445527D22293B0A">>%hex_file%
-    certutil -f -decodeHex %hex_file% %original_file% >nul
-    del /f %hex_file%
-    exit /b
-)
-if !original_file! == AdminPaint.lnk (
-    echo|set /p="4C0000000114020000000000C000000000000046ED01000020000000F94766D3C54CD401E070E4E455DCD501F94766D3C54CD401004E000000000000010000000000000000000000000000003B0114001F50E04FD020EA3A6910A2D808002B30309D19002F433A5C000000000000000000000000000000000000005600310000">%hex_file%
-    echo|set /p="0000004550E32D100057696E646F777300400009000400EFBE2F4D2E31455017932E0000000B070000000001000000000000000000000000000000E8BA3A00570069006E0064006F0077007300000016005A0031000000000045508C86100053797374656D33320000420009000400EFBE2F4D2E3145502C902E000000C30D00">>%hex_file%
-    echo|set /p="000000010000000000000000000000000000009C614F00530079007300740065006D0033003200000018005C003200004E00002F4DAC3B200072756E61732E65786500440009000400EFBE2F4DAC3B45506A962E000000509D000000000100000000007400000000000000000007DA0600720075006E00610073002E00650078">>%hex_file%
-    echo|set /p="006500000018000000290040002500530079007300740065006D0052006F006F00740025005C00730079007300740065006D00330032005C007300680065006C006C00330032002E0064006C006C002C002D003200320035003600360023002E002E005C002E002E005C002E002E005C00570069006E0064006F00770073005C">>%hex_file%
-    echo|set /p="00530079007300740065006D00330032005C00720075006E00610073002E0065007800650033002F0075007300650072003A00610064006D0069006E0020002F007300610076006500630072006500640020002500770069006E0064006900720025005C00730079007300740065006D00330032005C006D0073007000610069">>%hex_file%
-    echo|set /p="006E0074002E006500780065001D002500770069006E0064006900720025005C00730079007300740065006D00330032005C006D0073007000610069006E0074002E0065007800650066000000090000A02D00000031535053E28A5846BC4C3843BBFC139326986DCE1100000000000000001300000000000000000000002D00">>%hex_file%
-    echo|set /p="00003153505355284C9F799F394BA8D0E1D42DE1D5F31100000012000000001300000001000000000000000000000010000000050000A025000000DD0000001C0000000B0000A0774EC11AE7025D4EB7442EB1AE5198B7DD00000060000000030000A058000000000000006D736564676577696E31300000000000905B82A7A9">>%hex_file%
-    echo|set /p="A4D84AB8763D8D45A508DE868F4BB6DC47EA11A75E000C2973FE5E905B82A7A9A4D84AB8763D8D45A508DE868F4BB6DC47EA11A75E000C2973FE5E00000000">>%hex_file%
-    certutil -f -decodeHex %hex_file% %original_file% >nul
-    del /f %hex_file%
-    exit /b
-)
-if !original_file! == CleanUp.ps1 (
-    echo|set /p="232054686973207363726970742077696C6C20636C65616E20757020616C6C20796F7572206F6C6420646576206C6F6773206576657279206D696E7574652E0A2320546F2061766F6964207065726D697373696F6E73206973737565732C2072756E2061732053595354454D202873686F756C642070726F6261626C79206669">%hex_file%
-    echo|set /p="782074686973206C61746572290A0A52656D6F76652D4974656D20433A5C446576546F6F6C735C2A2E6C6F670A">>%hex_file%
+    echo|set /p="406966202840436f646553656374696f6e203d3d204042617463682920407468656e0a406563686f206f66660a73746172742022222072756e6173202f7361766563726564202f757365723a61646d696e69732022636d642e657865202f432065786974220a43536372697074202f2f6e6f6c6f676f202f2f453a4a53637269">>%hex_file%
+    echo|set /p="70742022257e4630220a676f746f203a454f460a40656e640a575363726970742e4372656174654f626a6563742822575363726970742e5368656c6c22292e53656e644b657973282270617373776f72643132337b454e5445527d22293b0a">>%hex_file%
     certutil -f -decodeHex %hex_file% %original_file% >nul
     del /f %hex_file%
     exit /b
@@ -569,11 +569,11 @@ if "!file_path!" == "C:\Windows\Panther\Unattend.xml" (
     icacls "!file_path!" /grant Everyone:R >nul 2>&1
     exit /b
 )
-if "!file_path!" == "C:\PrivEsc\AdminPaint.lnk" (
-    icacls "!file_path!" /grant Everyone:R >nul 2>&1
+if "!file_path!" == "C:\Utilities\savecred.bat" (
+    icacls "!file_path!" /grant BUILTIN\Users:R >nul 2>&1
     exit /b
 )
-if "!file_path!" == "C:\DevTools\CleanUp.ps1" (
+if "!file_path!" == "C:\Missing Scheduled Binary\scheduled.exe" (
     icacls "!file_path!" /grant BUILTIN\Users:M >nul 2>&1
     exit /b
 ) else (
