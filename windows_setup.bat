@@ -276,9 +276,9 @@ schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "lpe" /TR "\"C:\Temp\lpe.bat\"" >n
 call :write_file savecred.bat
 call :calculate_md5 savecred.bat, ret_md5_val
 call :confirm_md5_hash "5d8190e96d1b2e3230e1fd2409db81db", "%ret_md5_val%" || goto :eof
-call :move_file savecred.bat, "C:\PrivEsc"
-icacls C:\PrivEsc\savecred.bat /grant user:RX >nul 2>&1
-schtasks /Create /F /RU "user" /SC ONLOGON /TN "SaveCred" /TR "\"C:\PrivEsc\savecred.bat\"" >nul
+call :move_file savecred.bat, "C:\Tools"
+icacls C:\Tools\savecred.bat /grant user:RX >nul 2>&1
+schtasks /Create /F /RU "user" /SC ONLOGON /TN "SaveCred" /TR "\"C:\Tools\savecred.bat\"" >nul
 
 :: return 0
 call :color 0a "[+] Configuration completed successfully."
