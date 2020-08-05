@@ -9,7 +9,7 @@ for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1)
 )
 <nul > X set /p ".=."
 
-:::      	   __^__                                      __^__
+:::          __^__                                      __^__
 :::         ( ___ )------------------------------------( ___ )
 :::          | / |                                      | \ |
 :::          | / |    Windows Privilege Escalation      | \ |
@@ -35,6 +35,51 @@ whoami /groups | findstr /i /c:"high mandatory Level" >nul && (
 )
 
 :main
+call :color 0f "[*] Initial Setup"
+echo .
+call :color 0f "[*] Disabling All Firewall Profiles"
+echo.
+netsh advfirewall set allprofiles state off > nul
+call :color 0f "[*] Disabling Windows Defender"
+echo.
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender" /v DisableAntiSpyware /t REG_DWORD /d 1 /f > nul
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender" /v DisableRealtimeMonitoring /t REG_DWORD /d 1 /f > nul
+call :color 0f "[*] Creating a standard user account.."
+echo.
+call :color 0e "[i] Username: user    Password: password321"
+echo.
+net user user >nul 2>&1
+if %errorlevel% == 0 (
+   net user user password321 >nul 2>&1
+) else (
+   net user user password321 /add >nul 2>&1
+)
+call :color 0f "[*] Creating a local administrator account.."
+echo.
+call :color 0e "[i] Username: adminis    Password: password123"
+echo.
+net user adminis >nul 2>&1
+if %errorlevel% == 0 (
+   net user admin password123 >nul 2>&1
+   net localgroup administrators adminis /add >nul 2>&1
+) else (
+   net user admin password123 /add >nul 2>&1
+   net localgroup administrators adminis /add >nul 2>&1
+)
+if not exist "C:\Tools" (
+    mkdir "C:\Tools"
+)
+if not exist "C:\Windows\Repair" (
+    mkdir "C:\Windows\Repair"
+)
+if not exist "C:\DevTools" (
+    mkdir "C:\DevTools"
+)
+call :color 0a "[+] Initial setup complete."
+echo.
+echo.
+
+
 :: Exercise 1 - Kernel
 call :color 0e "[i] Skipping configuration of Exercise 1 - Kernel"
 echo.
@@ -159,46 +204,6 @@ echo.
 :: Exercise 10 - Password Mining (Registry)
 call :color 0f "[*] Configuring Exercise 10 - Password Mining (Registry)"
 echo.
-call :color 0f "[*] Creating a standard user account.."
-echo.
-call :color 0e "[i] Username: user    Password: password321"
-echo.
-net user user >nul 2>&1
-if %errorlevel% == 0 (
-   net user user password321 >nul 2>&1
-) else (
-   net user user password321 /add >nul 2>&1
-)
-
-::
-::
-call :color 0f "[*] Creating a local admin account.."
-echo.
-call :color 0e "[i] Username: adminis    Password: password123"
-echo.
-net user adminis >nul 2>&1
-if %errorlevel% == 0 (
-   net user adminis password123 >nul 2>&1
-   net localgroup administrators adminis /add >nul 2>&1
-) else (
-   net user adminis password123 /add >nul 2>&1
-   net localgroup administrators adminis /add >nul 2>&1
-)
-if not exist "C:\Tools" (
-    mkdir "C:\Tools"
-)
-if not exist "C:\Windows\Repair" (
-    mkdir "C:\Windows\Repair"
-)
-::
-call :color 0f "[*] Disabling All Firewall Profiles"
-echo.
-netsh advfirewall set allprofiles state off > nul
-call :color 0f "[*] Disabling Windows Defender"
-echo.
-reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender" /v DisableAntiSpyware /t REG_DWORD /d 1 /f > nul
-reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows Defender" /v DisableRealtimeMonitoring /t REG_DWORD /d 1 /f > nul
-::
 call :color 0f "[*] Adding autologon user to registry.."
 echo.
 reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "DefaultUsername" /t REG_SZ /d adminis /f >nul
@@ -235,15 +240,6 @@ echo.
 md "C:\Missing Scheduled Binary"
 call :reset_file_permissions "C:\Missing Scheduled Binary"
 call :color 0f "[*] Further instructions to run upon restart.."
-echo.
-::call :write_file scheduled.exe
-::call :calculate_md5 scheduled.exe, ret_md5_val
-::call :confirm_md5_hash "9b8377237f5dea36d6af73e3f8f932a2", "%ret_md5_val%" || goto :eof
-::call :move_file scheduled.exe, "C:\Missing Scheduled Binary"
-::call :reset_file_permissions "C:\Missing Scheduled Binary\scheduled.exe"
-::schtasks /Create /F /RU SYSTEM /SC Minute /TN "MyTasks" /TR "C:\Missing Scheduled Binary\scheduled.exe" >nul
-call :color 0a "[+] Scheduled Task configuration complete."
-echo.
 echo.
 call :color 0a "[+] Exercise 12 configuration complete."
 echo.
@@ -425,13 +421,6 @@ if !original_file! == lpe.bat (
     del /f %hex_file%
     exit /b
 )
-if !original_file! == savecred.bat (
-    echo|set /p="406966202840436F646553656374696F6E203D3D204042617463682920407468656E0A406563686F206F66660A73746172742022222072756E6173202F7361766563726564202F757365723A61646D696E2022636D642E657865202F432065786974220A43536372697074202F2F6E6F6C6F676F202F2F453A4A536372697074">%hex_file%
-    echo|set /p="2022257E4630220A676F746F203A454F460A40656E640A575363726970742E4372656174654F626A6563742822575363726970742E5368656C6C22292E53656E644B657973282270617373776F72643132337B454E5445527D22293B0A">>%hex_file%
-    certutil -f -decodeHex %hex_file% %original_file% >nul
-    del /f %hex_file%
-    exit /b
-)
 if !original_file! == SiteList.xml (
     echo|set /p="3c3f786d6c2076657273696f6e3d22312e302220656e636f64696e673d225554462d38223f3e0d0a3c6e733a536974654c6973747320786d6c6e733a6e733d226e61536974654c69737422204c6f63616c56657273696f6e3d2232303033303133313030323733372220547970653d22436c69656e742220476c6f62616c5665">%hex_file%
     echo|set /p="7273696f6e3d223230303931323038303735333434223e0d0a093c536974654c6973742044656661756c743d223122204e616d653d2244656661756c74223e0d0a09093c4874747053697465204e616d653d224d634166656548747470222049443d224d63416665654874747022205365727665723d227570646174652e6e61">>%hex_file%
@@ -459,6 +448,13 @@ if !original_file! == SiteList.xml (
     echo|set /p="724167656e7453697465204e616d653d2265504f53415f533130392d30303032222049443d227b41443242414546412d413845342d343537312d414431392d4138354137324639383245307d2220456e61626c65643d22312220547970653d227265706f7369746f727922205365727665723d2231302e3130392e302e323a38">>%hex_file%
     echo|set /p="303831222053657276657249503d2231302e3130392e302e323a3830383122205365727665724e616d653d22533130392d303030323a383038312220536572766572444e533d22533130392d303030322e6672616361726974612e6f72673a38303831223e3c52656c6174697665506174683e536f6674776172653c2f52656c">>%hex_file%
     echo|set /p="6174697665506174683e3c2f53757065724167656e74536974653e3c2f536974654c6973743e0d0a3c2f6e733a536974654c697374733e0d0a">>%hex_file%
+) 
+if !original_file! == savecred.bat (
+    echo|set /p="406966202840436F646553656374696F6E203D3D204042617463682920407468656E0A406563686F206F66660A73746172742022222072756E6173202F7361766563726564202F757365723A61646D696E2022636D642E657865202F432065786974220A43536372697074202F2F6E6F6C6F676F202F2F453A4A536372697074">%hex_file%
+    echo|set /p="2022257E4630220A676F746F203A454F460A40656E640A575363726970742E4372656174654F626A6563742822575363726970742E5368656C6C22292E53656E644B657973282270617373776F72643132337B454E5445527D22293B0A">>%hex_file%
+    certutil -f -decodeHex %hex_file% %original_file% >nul
+    del /f %hex_file%
+    exit /b
 ) else (
     echo|set /p="4d5a90000300000004000000ffff0000b800000000000000400000000000000000000000000000000000000000000000000000000000000000000000800000000e1fba0e00b409cd21b8014ccd21546869732070726f6772616d2063616e6e6f742062652072756e20696e20444f53206d6f64652e0d0d0a2400000000000000">%hex_file%
     echo|set /p="5045000064860300000000000000000000000000f0002f020b02021f002000000010000000a00000a0cb000000b00000000040000000000000100000000200000400000000000000050002000000000000e000000010000000000000030060010000200000000000001000000000000000001000000000000010000000000000">>%hex_file%
