@@ -9,14 +9,9 @@ for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1)
 )
 <nul > X set /p ".=."
 
-:::      	   __^__                                      __^__
-:::         ( ___ )------------------------------------( ___ )
-:::          | / |                                      | \ |
-:::          | / |    Windows Privilege Escalation      | \ |
-:::          |___|          Windows Installer           |___|
-:::         (_____)------------------------------------(_____)
-:::     
-:::           Sagi Shahar (@s4gi_)  Osmin Oliva (@osmic71)
+:::
+:::     Local Privilege Escalation Workshop - Windows Installer
+:::             Sagi Shahar (@s4gi_), Tib3rius (@tibsec)
 
 for /f "delims=: tokens=*" %%A in ('findstr /b ::: "%~f0"') do (
   echo(%%A
