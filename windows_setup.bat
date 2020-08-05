@@ -9,16 +9,13 @@ for /F "tokens=1,2 delims=#" %%a in ('"prompt #$H#$E# & echo on & for %%b in (1)
 )
 <nul > X set /p ".=."
 
-:::             .--.           .---.        .-.
-:::         .---|--|   .-.     | T |  .---. |~|    .--.
-:::      .--|===|Re|---|_|--.__| A |--|:::| |~|-==-|==|---.
-:::      |%%|DLL|gi|===| |~~|%%| S |--|   |_|~|DACL|  |___|-.
-:::      |  |   |st|===| |==|  | K |  |:::|=| |    |SC|---|=|
-:::      |  |   |ry|   |_|__|  | S |__|   | | |    |  |___| |
-:::      |~~|===|--|===|~|~~|%%|~~~|--|:::|=|~|----|==|---|=|
-:::hjw   ^--^---'--^---^-^--^--^---'--^---^-^-^-==-^--^---^-'
-:::
-:::     Local Privilege Escalation Workshop - Windows Installer
+:::      	   __^__                                      __^__
+:::         ( ___ )------------------------------------( ___ )
+:::          | / |                                      | \ |
+:::          | / |    Windows Privilege Escalation      | \ |
+:::          |___|          Windows Installer           |___|
+:::         (_____)------------------------------------(_____)
+:::     
 :::           Sagi Shahar (@s4gi_)  Osmin Oliva (@osmic71)
 
 for /f "delims=: tokens=*" %%A in ('findstr /b ::: "%~f0"') do (
@@ -239,12 +236,12 @@ md "C:\Missing Scheduled Binary"
 call :reset_file_permissions "C:\Missing Scheduled Binary"
 call :color 0f "[*] Further instructions to run upon restart.."
 echo.
-call :write_file scheduled.exe
+::call :write_file scheduled.exe
 ::call :calculate_md5 scheduled.exe, ret_md5_val
 ::call :confirm_md5_hash "9b8377237f5dea36d6af73e3f8f932a2", "%ret_md5_val%" || goto :eof
-call :move_file scheduled.exe, "C:\Missing Scheduled Binary"
-call :reset_file_permissions "C:\Missing Scheduled Binary\scheduled.exe"
-schtasks /Create /F /RU SYSTEM /SC Minute /TN "MyTasks" /TR "C:\Missing Scheduled Binary\scheduled.exe" >nul
+::call :move_file scheduled.exe, "C:\Missing Scheduled Binary"
+::call :reset_file_permissions "C:\Missing Scheduled Binary\scheduled.exe"
+::schtasks /Create /F /RU SYSTEM /SC Minute /TN "MyTasks" /TR "C:\Missing Scheduled Binary\scheduled.exe" >nul
 call :color 0a "[+] Scheduled Task configuration complete."
 echo.
 echo.
