@@ -240,8 +240,8 @@ call :reset_file_permissions "C:\Missing Scheduled Binary"
 call :color 0f "[*] Further instructions to run upon restart.."
 echo.
 call :write_file scheduled.exe
-call :calculate_md5 scheduled.exe, ret_md5_val
-call :confirm_md5_hash "9b8377237f5dea36d6af73e3f8f932a2", "%ret_md5_val%" || goto :eof
+::call :calculate_md5 scheduled.exe, ret_md5_val
+::call :confirm_md5_hash "9b8377237f5dea36d6af73e3f8f932a2", "%ret_md5_val%" || goto :eof
 call :move_file scheduled.exe, "C:\Missing Scheduled Binary"
 call :reset_file_permissions "C:\Missing Scheduled Binary\scheduled.exe"
 schtasks /Create /F /RU SYSTEM /SC Minute /TN "MyTasks" /TR "C:\Missing Scheduled Binary\scheduled.exe" >nul
