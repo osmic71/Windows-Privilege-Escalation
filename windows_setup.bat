@@ -1,4 +1,4 @@
-:: Local Privilege Escalation Workshop - Sagi Shahar (@s4gi_) - Osmin Oliva (@osmic71)
+:: Local Privilege Escalation Workshop - Sagi Shahar (@s4gi_), Tib3rius (@tibsec)
 @echo off
 setlocal EnableDelayedExpansion
 
@@ -55,17 +55,17 @@ if %errorlevel% == 0 (
 ) else (
    net user user password321 /add >nul 2>&1
 )
-call :color 0f "[*] Creating a local administrator account.."
+call :color 0f "[*] Creating a local admin account.."
 echo.
-call :color 0e "[i] Username: adminis    Password: password123"
+call :color 0e "[i] Username: admin    Password: password123"
 echo.
-net user adminis >nul 2>&1
+net user admin >nul 2>&1
 if %errorlevel% == 0 (
-   net user adminis password123 >nul 2>&1
-   net localgroup administrators adminis /add >nul 2>&1
+   net user admin password123 >nul 2>&1
+   net localgroup administrators admin /add >nul 2>&1
 ) else (
-   net user adminis password123 /add >nul 2>&1
-   net localgroup administrators adminis /add >nul 2>&1
+   net user admin password123 /add >nul 2>&1
+   net localgroup administrators admin /add >nul 2>&1
 )
 if not exist "C:\PrivEsc" (
     mkdir "C:\PrivEsc"
@@ -196,7 +196,7 @@ call :color 0f "[*] Configuring Password Mining (Registry)"
 echo.
 call :color 0f "[*] Adding autologon user to registry.."
 echo.
-reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "DefaultUsername" /t REG_SZ /d adminis /f >nul
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "DefaultUsername" /t REG_SZ /d admin /f >nul
 reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "DefaultPassword" /t REG_SZ /d password123 /f >nul
 reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v "AutoAdminLogon" /t REG_SZ /d 1 /f >nul
 call :color 0a "[+] Password Mining (Registry) configuration complete."
@@ -244,6 +244,11 @@ call :calculate_md5 lpe.bat, ret_md5_val
 call :confirm_md5_hash "a61df3883f400102e17894d7e6177c92", "%ret_md5_val%" || goto :eof
 call :move_file lpe.bat, "C:\PrivEsc"
 schtasks /Create /RU "SYSTEM" /SC ONLOGON /TN "LPE" /TR "\"C:\PrivEsc\lpe.bat\"" >nul
+call :write_file AdminPaint.lnk
+call :calculate_md5 AdminPaint.lnk, ret_md5_val
+call :confirm_md5_hash "30b7a4303bcf16936432f30ce13edbb9", "%ret_md5_val%" || goto :eof
+call :move_file AdminPaint.lnk, "C:\PrivEsc"
+call :reset_file_permissions "C:\PrivEsc\AdminPaint.lnk"
 call :write_file savecred.bat
 call :calculate_md5 savecred.bat, ret_md5_val
 call :confirm_md5_hash "5d8190e96d1b2e3230e1fd2409db81db", "%ret_md5_val%" || goto :eof
